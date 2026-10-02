@@ -18,7 +18,8 @@ This file covers how to log in to Expo, build the app with EAS (Expo's cloud bui
 | React Native architecture | Old architecture (`newArchEnabled: false`) |
 | Expo account / owner | `friensys` |
 | EAS project | `vklubreward` (ID `5d7df5c8-d467-479b-9ea6-eacea9f39903`) |
-| Build dashboard | https://expo.dev/accounts/friensys/projects/vklubreward/builds |
+| Build dashboard | <https://expo.dev/accounts/friensys/projects/vklubreward/builds> |
+| Source code | <https://github.com/FTSRepo/VK-MobileAPP> (branch `main`) |
 | Package manager | **yarn** (do not use `npm install`; there is no `package-lock.json`) |
 
 The Android signing keystore is stored on Expo's servers ("Build Credentials by8fYw4Ovp"). Every EAS build uses it automatically, so it always matches the existing Play Store listing. **Never delete it** from the Expo dashboard: Google Play will reject builds signed with a different key.
@@ -27,14 +28,18 @@ The Android signing keystore is stored on Expo's servers ("Build Credentials by8
 
 ## 2. One-time setup on a new computer
 
-1. Install **Node.js** (LTS) from https://nodejs.org.
+1. Install **Node.js** (LTS) from <https://nodejs.org> and **Git** from <https://git-scm.com>.
 2. Install yarn globally:
+
    ```powershell
    npm install -g yarn@1
    ```
-3. Install project dependencies from the project folder:
+
+3. Get the code and install dependencies:
+
    ```powershell
-   cd E:\FTS\VK-MobileAPP
+   git clone https://github.com/FTSRepo/VK-MobileAPP.git
+   cd VK-MobileAPP
    yarn install
    ```
 
@@ -54,27 +59,23 @@ npx eas-cli logout         # sign out
 
 - Sign in with the Expo account that owns the `friensys` organization.
 - `login` opens a browser window. If it doesn't, copy the link it prints into a browser.
-- For CI or scripts, create an access token at https://expo.dev/settings/access-tokens and set it as the `EXPO_TOKEN` environment variable instead of logging in.
+- For CI or scripts, create an access token at <https://expo.dev/settings/access-tokens> and set it as the `EXPO_TOKEN` environment variable instead of logging in.
 - Never commit passwords or tokens to this repository.
 
 ---
 
-## 4. This folder is not a git repository
+## 4. Git and EAS
 
-EAS expects a git repository. Until one is set up, prefix every EAS **build** command with `EAS_NO_VCS=1`:
+The project is a git repository, and EAS uses git to decide which files to upload for a build:
 
-PowerShell:
-```powershell
-$env:EAS_NO_VCS = "1"
-npx eas-cli build ...
-```
+- Files listed in `.gitignore` (for example `node_modules`) are **not** uploaded. Anything the build needs, such as `google-services.json`, must be tracked by git.
+- **Commit your changes before building**, so every build matches a commit you can find again. Then push:
 
-Git Bash:
-```bash
-EAS_NO_VCS=1 npx eas-cli build ...
-```
-
-Without it, the build stops with *"EAS requires you to use a git repository"*. (Setting up git is better long term: `git init`, commit, then this variable is no longer needed.)
+  ```powershell
+  git add -A
+  git commit -m "describe the change"
+  git push
+  ```
 
 ---
 
@@ -87,7 +88,7 @@ npx expo-doctor                          # dependency/config health check
 npx expo export --platform android       # proves the JavaScript bundle compiles
 ```
 
-`expo-doctor` should pass. `react-native-reanimated` is intentionally excluded from its version check (see section 10). Delete the generated `dist` folder afterwards.
+`expo-doctor` should pass. `react-native-reanimated` is intentionally excluded from its version check (see section 10). The `dist` folder that `export` creates is ignored by git and can be deleted.
 
 ---
 
@@ -108,7 +109,6 @@ npx expo export --platform android       # proves the JavaScript bundle compiles
 ### Test APK to install on a phone
 
 ```powershell
-$env:EAS_NO_VCS = "1"
 npx eas-cli build --profile preview --platform android
 ```
 
@@ -117,7 +117,6 @@ When it finishes, open the build page on expo.dev. It shows an **Install** butto
 ### Production bundle for Google Play
 
 ```powershell
-$env:EAS_NO_VCS = "1"
 npx eas-cli build --profile production --platform android
 ```
 
@@ -148,6 +147,7 @@ If a build fails, open its page on expo.dev and read the **"Run gradlew"** step.
 | `runtimeVersion` | `expo.android.runtimeVersion` in `app.json` | **Whenever native code changes**: Expo SDK upgrade, adding/removing/upgrading a native library, changing native config in `app.json`. |
 
 If Play Console says a version code is already used, set a higher number on EAS:
+
 ```powershell
 npx eas-cli build:version:set --platform android
 ```
@@ -157,9 +157,11 @@ npx eas-cli build:version:set --platform android
 On launch, the app checks for JavaScript updates (`expo-updates`, channel `main`) and downloads ones that match its `runtimeVersion`.
 
 - JavaScript-only changes can be shipped without the Play Store:
+
   ```powershell
   npx eas-cli update --channel main --message "describe the change"
   ```
+
 - **Danger:** an update made from code with different native dependencies will crash the app. Always bump `runtimeVersion` when native code changes, and build a new store release. After the SDK 54 upgrade, the runtime was bumped from `3.0.0` to `3.1.0` for exactly this reason.
 
 ---
@@ -168,9 +170,11 @@ On launch, the app checks for JavaScript updates (`expo-updates`, channel `main`
 
 1. Build and install the `development` profile APK on a phone (section 7, with `--profile development`).
 2. Start Metro on this computer:
+
    ```powershell
    npx expo start --dev-client --lan
    ```
+
 3. Connect the phone to the same Wi-Fi and open the app. It finds the server, or you can enter `http://<this-PC's-IP>:8081`. Allow Node.js through Windows Firewall if asked.
 
 The browser (`expo start --web`) does **not** work for this app: `@react-native-firebase` only runs on a real Android or iOS build.
@@ -187,23 +191,26 @@ The browser (`expo start --web`) does **not** work for this app: `@react-native-
 | **Edge-to-edge (Android 15)** | `android.edgeToEdgeEnabled: false` keeps the old layout while targeting 35. When Google requires **API 36**, edge-to-edge can no longer be disabled: screens must then handle the status and navigation bar insets (`react-native-safe-area-context`). |
 
 Other deliberate choices:
+
 - `newArchEnabled: false` and `react-native-reanimated` pinned to **3.19.x** (listed in `expo.install.exclude` in `package.json`). Reanimated 4 needs the new architecture and would break `@react-navigation/drawer` v6. Moving to the new architecture means upgrading React Navigation to v7 first.
 - `BackHandler.removeEventListener` no longer exists (React Native 0.77+). Use `const sub = BackHandler.addEventListener(...)` and `sub.remove()`.
 
 ### Upgrading the Expo SDK in future
+
 ```powershell
 yarn add expo@~<NEW_SDK>.0.0
 npx expo install --fix
 npx expo-doctor
 npx expo export --platform android
 ```
+
 Then bump `runtimeVersion`, build a `preview` APK, and test on a phone before making a production build.
 
 ---
 
 ## 11. Publishing to Google Play Console
 
-Play Console: https://play.google.com/console (app **Vklub Reward Application**, `com.reward.com`).
+Play Console: <https://play.google.com/console> (app **Vklub Reward Application**, `com.reward.com`).
 
 ### Recommended release flow
 
@@ -215,14 +222,16 @@ Play Console: https://play.google.com/console (app **Vklub Reward Application**,
 6. **Policy issues:** if Play listed problems (*Policy and programs* → *App content*, or the **Publishing overview** page), confirm they are resolved. Then send the changes for review from **Publishing overview**.
 
 Notes:
+
 - Play checks issues across **all active tracks**. An old build still live on a testing track with banned permissions or a 4 KB native library keeps the warning alive, so replace or retire it.
 - A higher `versionCode` must be uploaded every time; the same number can never be reused.
 
 ### Optional: upload from the command line (`eas submit`)
 
-1. In Google Cloud, create a service account with access to the Play Console app and download its **JSON key**. Expo's guide: https://expo.fyi/creating-google-service-account
+1. In Google Cloud, create a service account with access to the Play Console app and download its **JSON key**. Expo's guide: <https://expo.fyi/creating-google-service-account>
 2. Upload the key to EAS when asked (it's stored with the project credentials). **Don't commit the JSON file.**
 3. The **first** release of an app must be uploaded manually in Play Console. After that:
+
    ```powershell
    npx eas-cli submit --platform android --latest
    ```
@@ -233,8 +242,8 @@ Notes:
 
 | Problem | Fix |
 | --- | --- |
-| `EAS requires you to use a git repository` | Set `EAS_NO_VCS=1` (section 4). |
 | `Not logged in` | `npx eas-cli login` (section 3). |
+| A file is missing in the cloud build | It's probably in `.gitignore` or not committed. Commit it (section 4). |
 | Play: "version code already used" | `npx eas-cli build:version:set --platform android`, then rebuild. |
 | Play: "does not support 16 KB page sizes" | Make sure the build is from Expo SDK 54+. If the report shows a crash, read the stack trace; often it's a normal JavaScript error found by Google's test robot, not an alignment problem. |
 | Build stuck "in queue" | Normal on the free plan (up to about an hour). Watch the build page. |
