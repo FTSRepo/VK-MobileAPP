@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "28083460863",
+    "project_id": "friensysapp",
+    "storage_bucket": "friensysapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28083460863:android:7fb86aaa76d3406b510aca",
+        "android_client_info": {
+          "package_name": "com.reward.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhiQnBhqLHApOhMEG49D5OOP_e5_ia5Ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

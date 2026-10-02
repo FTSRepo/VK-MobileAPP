@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Open Vklub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        padding-top: 50px;
+      }
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Allowed screen routes
+        const allowedScreens = [
+          "home",
+          "profile",
+          "loyality",
+          "redeem",
+          "transaction",
+          "history",
+          "scheme",
+          "schemeHistory",
+          "schemeRedeem",
+          "notification",
+          "statement",
+          "bilty"
+        ];
+
+        const params = new URLSearchParams(window.location.search);
+        const screen = params.get("screen");
+
+        if (allowedScreens.includes(screen)) {
+          // Create deep link
+          const deepLink = `vklub://${screen}`;
+
+          // Redirect to app
+          window.location.href = deepLink;
+
+          // Fallback to Play Store after timeout
+          setTimeout(() => {
+            window.location.href = "https://play.google.com/store/apps/details?id=com.reward.com";
+          }, 1500);
+        } else {
+          // Show error message
+          document.getElementById("message").textContent =
+            "Invalid or missing screen name.";
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <p id="message">Redirecting to Vklub App...</p>
+  </body>
+</html>

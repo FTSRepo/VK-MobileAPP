@@ -1,0 +1,45 @@
+[
+    {
+        "id": "1",
+        "name": "Dashboard",
+        "icon": "home",
+        "navigate": "home"
+    },
+    {
+        "id": "2",
+        "name": "VK Gift ",
+        "icon": "card-giftcard",
+        "navigate": "loyality"
+    },
+    {
+        "id": "3",
+        "name": "VK Scheme",
+        "icon": "bubble-chart",
+        "navigate": "scheme"
+    },
+    {
+        "id": "5",
+        "name": "Statement",
+        "icon": "short-text",
+        "navigate": "statement"
+    },
+    {
+        "id": "6",
+        "name": "Bilty",
+        "icon": "book-online",
+        "navigate": "bilty"
+    },
+    {
+        "id": "5",
+        "name": "Profile",
+        "icon": "person",
+        "navigate": "profile"
+    }, 
+
+    {
+        "id": "6",
+        "name": "Change Password",
+        "icon": "enhanced-encryption",
+        "navigate": "password"
+    }
+]
